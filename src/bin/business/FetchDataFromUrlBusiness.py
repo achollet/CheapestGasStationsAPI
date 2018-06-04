@@ -2,12 +2,8 @@ from urllib.request import urlopen, URLError
 from zipfile import ZipFile
 from io import BytesIO
 
-class FetchDataFromUrl:
-    
-    urls = {"now" : "https://donnees.roulez-eco.fr/opendata/instantane",
-            "daily" : "https://donnees.roulez-eco.fr/opendata/jour",
-            "year" : "https://donnees.roulez-eco.fr/opendata/annee"}
-    
+class fetchDataFromUrlBusiness:
+        
     def __init__(self):
         self.urls = {"now" : "https://donnees.roulez-eco.fr/opendata/instantane",
             "daily" : "https://donnees.roulez-eco.fr/opendata/jour",
@@ -23,8 +19,13 @@ class FetchDataFromUrl:
         zippedFile = BytesIO(response.read())
         unzippedFile = ZipFile(zippedFile)
 
-        file = unzippedFile.Items
+        file = unzippedFile.filelist[Ø].filename
 
-        return ""
+        xmlString = ""
+
+        for line in unzippedFile.open(file).readline():
+            xmlString += line.decode(encoding="utf-8", errors="ignore")
+
+        return xmlString
 
          
