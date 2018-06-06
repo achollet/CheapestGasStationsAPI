@@ -12,6 +12,7 @@ def index():
     except HTTPError as e:
         print(e.code)
     except URLError as e:
+        print(e.args)
     
     unzippedfile = ZipFile(BytesIO(reponse.read()))
     file = unzippedfile.filelist[0].filename
