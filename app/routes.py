@@ -21,8 +21,9 @@ def index():
         return HTTPStatus.NOT_FOUND
 
     stations = XmlUnserializer(xmlString)
+    var = carburantDBModel()
 
-    return jsonify(stations=[station.jsonSerializer() for station in stations])
+    return jsonify(stations=[station.jsonSerializer() for station in stations])    
 
 def FileUnzipper(file):
     unzippedfile = ZipFile(BytesIO(file.read()))
@@ -82,13 +83,13 @@ class gasStationModel:
             'adresse': self.adresse,
             'ville': self.ville,
             'zipcode': self.zipcode,
-            'type' : self.type
-            'carburants': jsonify([carburant.jsonSerializer() for carburant in self.carburants])
-            'services': jsonify(self.services)
+            'type' : self.type,
+            'carburants': [carburant.jsonSerializer() for carburant in self.carburants],
+            'services': self.services
         }
 
 class carburantModel:
-    def __init__(self, id, name, price, status, upadateDate):
+    def __init__(self, id, name, price, status, updateDate):
         self.id = id
         self.name = name
         self.price = price
@@ -97,9 +98,9 @@ class carburantModel:
 
     def jsonSerializer(self):
         return {
-            'id': self.id
-            'label': self.name
-            'price': self.price
-            'status': self.status
+            'id': self.id,
+            'label': self.name,
+            'price': self.price,
+            'status': self.status,
             'lastUpdate' : self.updateDate
         }
