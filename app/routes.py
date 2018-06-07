@@ -4,8 +4,9 @@ from io import BytesIO
 from zipfile import ZipFile
 from flask import jsonify
 from http import HTTPStatus
+from xml.etree import ElementTree
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     try :
         reponse = urlopen("https://donnees.roulez-eco.fr/opendata/jour")
@@ -14,15 +15,49 @@ def index():
     except URLError as e:
         print(e.args)
     
-    unzippedfile = ZipFile(BytesIO(reponse.read()))
+    xmlString = FileUnzipper(reponse)
+
+    if xmlString is None or xmlString == "":
+        return HTTPStatus.NOT_FOUND
+
+    stations = XmlUnserializer(xmlString)
+
+    return jsonify(stations=[station.jsonSerializer() for station in stations])
+
+def FileUnzipper(file):
+    unzippedfile = ZipFile(BytesIO(file.read()))
     file = unzippedfile.filelist[0].filename
 
     if file is None or file == "":
-        return HTTPStatus.NOT_FOUND
+        return file
 
     xmlString = ""
 
     for line in unzippedfile.open(file).readlines():
         xmlString += line.decode(encoding="utf-8", errors="ignore")
 
-    return jsonify(xmlString)
+    return xmlString
+
+
+def XmlUnserializer(xmlString):
+    root = ElementTree.fromstring(xmlString)
+    stations = [gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))  for station in root.findall('pdv')]
+    return stations        
+        
+
+class gasStationModel:
+    def __init__(self, id, latitude, longitude, zipcode, type):
+        self.id = id
+        self.latitude = latitude
+        self.longitude = longitude
+        self.zipcode = zipcode
+        self.type = type
+
+    def jsonSerializer(self):
+        return {
+            'id': self.id,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'zipcode': self.zipcode,
+            'type' : self.type
+        }
