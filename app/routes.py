@@ -41,10 +41,16 @@ def FileUnzipper(file):
 
 def XmlUnserializer(xmlString):
     root = ElementTree.fromstring(xmlString)
-    stations = [gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))  for station in root.findall('pdv')]
+    stations = []
+    
+    for station in root.findall('pdv'):
+        gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
+        gasStationModel.adresse = station.get('adresse')
+        gasStationModel.ville = station.get('ville')
+        for price in station.findall('prix')
+        stations.append(gasStationModel)
+    
     return stations        
-        
-
 class gasStationModel:
     def __init__(self, id, latitude, longitude, zipcode, type):
         self.id = id
@@ -52,12 +58,18 @@ class gasStationModel:
         self.longitude = longitude
         self.zipcode = zipcode
         self.type = type
+        self.adresse = ""
+        self.ville = ""
+        self.carburants = []
+        self.services = []
 
     def jsonSerializer(self):
         return {
             'id': self.id,
             'latitude': self.latitude,
             'longitude': self.longitude,
+            'adresse': self.adresse,
+            'ville': self.ville,
             'zipcode': self.zipcode,
             'type' : self.type
         }
