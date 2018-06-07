@@ -47,7 +47,18 @@ def XmlUnserializer(xmlString):
         gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
         gasStationModel.adresse = station.get('adresse')
         gasStationModel.ville = station.get('ville')
-        for price in station.findall('prix')
+
+        for price in station.findall('prix'):
+            carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),"stock", price.get('maj'))
+            gasStationModel.carburants.append(carburantModel)
+
+        for rupture in station.findall('rupture'):
+            carburantModel(rupture.get('id'), rupture.get('nom'), "0","rupture", rupture.get('debut'))
+            gasStationModel.carburants.append(carburantModel)
+
+        for service in station.findall('service'):
+            gasStationModel.services.append(str(service.text, encoding='utf-8')) 
+
         stations.append(gasStationModel)
     
     return stations        
@@ -72,4 +83,23 @@ class gasStationModel:
             'ville': self.ville,
             'zipcode': self.zipcode,
             'type' : self.type
+            'carburants': jsonify([carburant.jsonSerializer() for carburant in self.carburants])
+            'services': jsonify(self.services)
+        }
+
+class carburantModel:
+    def __init__(self, id, name, price, status, upadateDate):
+        self.id = id
+        self.name = name
+        self.price = price
+        self.status = status
+        self.updateDate = updateDate
+
+    def jsonSerializer(self):
+        return {
+            'id': self.id
+            'label': self.name
+            'price': self.price
+            'status': self.status
+            'lastUpdate' : self.updateDate
         }
