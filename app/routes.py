@@ -45,18 +45,16 @@ def XmlUnserializer(xmlString):
     stations = []
     
     for station in root.findall('pdv'):
-        gasStation = gasStationModel.gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
-        gasStation.adresse = station.get('adresse')
-        gasStation.ville = station.get('ville')
-
+        gasStation = gasStationModel.gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'), station.get('adresse'), station.get('ville'))
+        #Adding all availables carburants
         for price in station.findall('prix'):
-            carburant = carburantModel.carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),"stock", price.get('maj'))
+            carburant = carburantModel.carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),True, price.get('maj'))
             gasStation.carburants.append(carburant)
-
+        #Adding all unavailables carburants
         for rupture in station.findall('rupture'):
-            carburant = carburantModel.carburantModel(rupture.get('id'), rupture.get('nom'), "0","rupture", rupture.get('debut'))
+            carburant = carburantModel.carburantModel(rupture.get('id'), rupture.get('nom'), "0",False, rupture.get('debut'))
             gasStation.carburants.append(carburant)
-        
+        #Adding station's services
         gasStation.services.append([str(service.text, encoding='utf-8') for service in station.findall('service')]) 
 
         stations.append(gasStation)
