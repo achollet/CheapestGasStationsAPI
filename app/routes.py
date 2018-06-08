@@ -5,6 +5,8 @@ from zipfile import ZipFile
 from flask import jsonify
 from http import HTTPStatus
 from xml.etree import ElementTree
+from app.models import gasStationModel, carburantModel
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -21,9 +23,7 @@ def index():
         return HTTPStatus.NOT_FOUND
 
     stations = XmlUnserializer(xmlString)
-    var = carburantDBModel()
-
-    return jsonify(stations=[station.jsonSerializer() for station in stations])    
+    return jsonify(stations=[station.jsonSerializer([carburant.jsonSerializer() for carburant in station.carburants])for station in stations])    
 
 def FileUnzipper(file):
     unzippedfile = ZipFile(BytesIO(file.read()))
@@ -45,62 +45,20 @@ def XmlUnserializer(xmlString):
     stations = []
     
     for station in root.findall('pdv'):
-        gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
-        gasStationModel.adresse = station.get('adresse')
-        gasStationModel.ville = station.get('ville')
+        gasStation = gasStationModel.gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
+        gasStation.adresse = station.get('adresse')
+        gasStation.ville = station.get('ville')
 
         for price in station.findall('prix'):
-            carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),"stock", price.get('maj'))
-            gasStationModel.carburants.append(carburantModel)
+            carburant = carburantModel.carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),"stock", price.get('maj'))
+            gasStation.carburants.append(carburant)
 
         for rupture in station.findall('rupture'):
-            carburantModel(rupture.get('id'), rupture.get('nom'), "0","rupture", rupture.get('debut'))
-            gasStationModel.carburants.append(carburantModel)
+            carburant = carburantModel.carburantModel(rupture.get('id'), rupture.get('nom'), "0","rupture", rupture.get('debut'))
+            gasStation.carburants.append(carburant)
+        
+        gasStation.services.append([str(service.text, encoding='utf-8') for service in station.findall('service')]) 
 
-        for service in station.findall('service'):
-            gasStationModel.services.append(str(service.text, encoding='utf-8')) 
-
-        stations.append(gasStationModel)
+        stations.append(gasStation)
     
-    return stations        
-class gasStationModel:
-    def __init__(self, id, latitude, longitude, zipcode, type):
-        self.id = id
-        self.latitude = latitude
-        self.longitude = longitude
-        self.zipcode = zipcode
-        self.type = type
-        self.adresse = ""
-        self.ville = ""
-        self.carburants = []
-        self.services = []
-
-    def jsonSerializer(self):
-        return {
-            'id': self.id,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            'adresse': self.adresse,
-            'ville': self.ville,
-            'zipcode': self.zipcode,
-            'type' : self.type,
-            'carburants': [carburant.jsonSerializer() for carburant in self.carburants],
-            'services': self.services
-        }
-
-class carburantModel:
-    def __init__(self, id, name, price, status, updateDate):
-        self.id = id
-        self.name = name
-        self.price = price
-        self.status = status
-        self.updateDate = updateDate
-
-    def jsonSerializer(self):
-        return {
-            'id': self.id,
-            'label': self.name,
-            'price': self.price,
-            'status': self.status,
-            'lastUpdate' : self.updateDate
-        }
+    return stations
