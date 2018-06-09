@@ -1,14 +1,14 @@
 from flask import jsonify
 
 class gasStationModel:
-    def __init__(self, id, latitude, longitude, zipcode, type):
+    def __init__(self, id, latitude, longitude, zipcode, type, city, address):
         self.id = id
         self.latitude = latitude
         self.longitude = longitude
         self.zipcode = zipcode
         self.type = type
-        self.adresse = ""
-        self.ville = ""
+        self.address = ""
+        self.city = ""
         self.carburants = []
         self.services = []
 
@@ -17,8 +17,8 @@ class gasStationModel:
             'id': self.id,
             'latitude': self.latitude,
             'longitude': self.longitude,
-            'adresse': self.adresse,
-            'ville': self.ville,
+            'adresse': self.address,
+            'ville': self.city,
             'zipcode': self.zipcode,
             'type' : self.type,
             'carburants': carburantsJson,

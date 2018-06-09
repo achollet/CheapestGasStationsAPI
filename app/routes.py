@@ -45,10 +45,8 @@ def XmlUnserializer(xmlString):
     stations = []
     
     for station in root.findall('pdv'):
-        gasStation = gasStationModel.gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'))
-        gasStation.adresse = station.get('adresse')
-        gasStation.ville = station.get('ville')
-
+        gasStation = gasStationModel.gasStationModel(station.get('id'), station.get('latitude'), station.get('longitude'), station.get('cp'), station.get('pop'), station.get('ville'), station.get('adresse'))
+        
         for price in station.findall('prix'):
             carburant = carburantModel.carburantModel(price.get('id'), price.get('nom'), price.get('valeur'),"stock", price.get('maj'))
             gasStation.carburants.append(carburant)
