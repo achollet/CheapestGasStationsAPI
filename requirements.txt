@@ -1,0 +1,5 @@
+#
+flask
+flask-sqlaclchemy
+flask-migrate
+#
